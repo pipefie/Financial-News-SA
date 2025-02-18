@@ -1,0 +1,15 @@
+https://huggingface.co/mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis
+
+https://huggingface.co/datasets/ashraq/financial-news-articles
+
+https://huggingface.co/datasets/dilkasithari-IT/sentiment_analysis_financial_news_data
+
+https://huggingface.co/datasets/ashraq/financial-news?row=3
+
+https://huggingface.co/datasets/Shadow-Blade/financialNews
+
+https://www.kaggle.com/datasets/miguelaenlle/massive-stock-news-analysis-db-for-nlpbacktests
+
+https://huggingface.co/distilbert/distilroberta-base
+
+https://huggingface.co/FacebookAI/roberta-base
