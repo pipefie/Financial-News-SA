@@ -1,8 +1,6 @@
 https://huggingface.co/mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis
 
-https://huggingface.co/datasets/ashraq/financial-news-articles
-
-https://huggingface.co/datasets/dilkasithari-IT/sentiment_analysis_financial_news_data
+https://huggingface.co/datasets/Zihan1004/FNSPID/tree/main/Stock_news
 
 https://huggingface.co/datasets/ashraq/financial-news?row=3
 
