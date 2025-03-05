@@ -1,4 +1,3 @@
-# Example snippet for Google Drive using PyDrive2
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 import os
@@ -45,6 +44,21 @@ def list_drive_files(folder_id):
     
     file_list = drive.ListFile({'q': f"'{folder_id}' in parents and trashed=false"}).GetList()
     return [(file['title'], file['id']) for file in file_list]
+
+def download_file_from_drive(file_id, local_path):
+    """Download a file from Google Drive to a local path."""
+    drive = authenticate_drive()
+    if not drive:
+        return None
+    
+    try:
+        file_obj = drive.CreateFile({'id': file_id})
+        file_obj.GetContentFile(local_path)
+        print(f"File with ID {file_id} downloaded to {local_path}.")
+        return local_path
+    except Exception as e:
+        print(f"Error downloading file {file_id}: {e}")
+        return None
 
 def create_folder(folder_name, parent_folder_id=None):
     """Create a new folder in Google Drive."""

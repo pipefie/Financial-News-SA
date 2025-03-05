@@ -9,6 +9,7 @@ Assumptions:
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lower, regexp_replace, to_date, trim
+import os
 
 def create_spark_session(app_name="FinancialDataPreprocessing"):
     return SparkSession.builder.appName(app_name).getOrCreate()
@@ -42,14 +43,23 @@ def save_cleaned_data(df, output_path):
     df.write.mode("overwrite").csv(output_path, header=True)
     print(f"Cleaned data saved to {output_path}")
 
-def main():
+def run_preprocessing_flow(config):
+    """
+    Main entry point for data preprocessing using a config dictionary.
+    """
     spark = create_spark_session()
 
-    # Define paths: update these paths to match your cloud-synced folders or local directories.
-    news_raw_path = "../../data/raw/financial_news.csv"       # Change this to your file's location
-    price_raw_path = "../../data/raw/price_AAPL.csv"            # Change to your price data file location
-    news_clean_output = "../../data/processed/clean_news_data"
-    price_clean_output = "../../data/processed/clean_price_data"
+    # Local paths from config
+    raw_data_path = config["local_paths"]["raw_data"]
+    processed_data_path = config["local_paths"]["processed_data"]
+
+    # Example: we assume the news and price CSVs are already downloaded locally
+    # E.g., data/raw/financial_news.csv and data/raw/price_data/AAPL_historical.csv
+    news_raw_path = os.path.join(raw_data_path, "financial_news.csv")
+    price_raw_path = os.path.join(raw_data_path, "price_data", "AAPL_historical.csv")
+
+    news_clean_output = os.path.join(processed_data_path, "clean_news_data")
+    price_clean_output = os.path.join(processed_data_path, "clean_price_data")
 
     # Load data
     news_df = load_news_data(spark, news_raw_path)
@@ -59,18 +69,23 @@ def main():
     news_clean_df = clean_news_data(news_df)
     price_clean_df = clean_price_data(price_df)
 
-    # Show sample data
     print("Sample cleaned news data:")
     news_clean_df.show(5, truncate=False)
     
     print("Sample cleaned price data:")
     price_clean_df.show(5, truncate=False)
 
-    # Save cleaned data (local storage is recommended during development for speed)
+    # Save cleaned data
     save_cleaned_data(news_clean_df, news_clean_output)
     save_cleaned_data(price_clean_df, price_clean_output)
 
     spark.stop()
 
 if __name__ == "__main__":
-    main()
+    default_config = {
+        "local_paths": {
+            "raw_data": "../../data/raw",
+            "processed_data": "../../data/processed"
+        }
+    }
+    run_preprocessing_flow(default_config)

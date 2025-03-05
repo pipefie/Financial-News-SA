@@ -1,0 +1,27 @@
+# config.yaml
+
+# List of ticker symbols to collect
+tickers:
+  - AAPL
+  - GOOGL
+  - MSFT
+
+# Date range for price collection
+start_date: "2014-01-01"
+end_date: "today"    # We can interpret "today" in Python code
+
+# Interval for price data (1d, 1wk, 1mo, etc.)
+interval: "1d"
+
+# Local paths for data
+local_paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+
+# Google Drive folder IDs 
+
+drive_folders:
+  raw_news_folder_id: "YOUR_FOLDER_ID"
+  processed_data_folder_id: "YOUR_FOLDER_ID"
+  historical_price_data_folder_id: "YOUR_FOLDER_ID"
+

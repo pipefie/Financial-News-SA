@@ -85,23 +85,39 @@ def collect_historical_data(tickers, start_date, end_date, output_path, interval
         else:
             logging.warning(f"Skipping saving for {ticker} due to download error or no data.")
 
-def main():
-    # Configuration parameters
-    tickers = ["AAPL", "GOOGL", "MSFT"]  # Add or modify tickers as needed
-    start_date = "2014-01-01"
-    end_date = datetime.today().strftime('%Y-%m-%d')  # Today's date
-    output_path = "../../data/raw/price_data"  # Adjust this to your preferred folder
-    interval = "1d"  # Daily data; can change to '1wk', '1mo', etc.
 
-    # Log configuration
+def run_collection_flow(config):
+    """
+    Main entry point for historical price collection using a config dictionary.
+    """
+    tickers = config.get("tickers", [])
+    start_date = config.get("start_date", "2014-01-01")
+    end_date = config.get("end_date", datetime.today().strftime('%Y-%m-%d'))
+    interval = config.get("interval", "1d")
+
+    # Where to store raw data locally
+    raw_data_path = config["local_paths"]["raw_data"]
+    price_data_subfolder = os.path.join(raw_data_path, "price_data")
+
     logging.info("Starting historical price data collection...")
     logging.info(f"Tickers: {tickers}")
     logging.info(f"Date range: {start_date} to {end_date}")
-    logging.info(f"Output path: {output_path}")
+    logging.info(f"Interval: {interval}")
+    logging.info(f"Output path: {price_data_subfolder}")
 
-    # Collect data
-    collect_historical_data(tickers, start_date, end_date, output_path, interval)
+    collect_historical_data(tickers, start_date, end_date, price_data_subfolder, interval)
+
     logging.info("Historical price data collection completed.")
 
 if __name__ == "__main__":
-    main()
+    # Optional: If you run this script standalone, define a default config here
+    default_config = {
+        "tickers": ["AAPL", "GOOGL", "MSFT"],
+        "start_date": "2014-01-01",
+        "end_date": datetime.today().strftime('%Y-%m-%d'),
+        "interval": "1d",
+        "local_paths": {
+            "raw_data": "../../data/raw"
+        }
+    }
+    run_collection_flow(default_config)
