@@ -11,3 +11,5 @@ https://www.kaggle.com/datasets/miguelaenlle/massive-stock-news-analysis-db-for-
 https://huggingface.co/distilbert/distilroberta-base
 
 https://huggingface.co/FacebookAI/roberta-base 
+
+https://www.kaggle.com/datasets/miguelaenlle/massive-stock-news-analysis-db-for-nlpbacktests?select=raw_partner_headlines.csv (2010 - 2020)

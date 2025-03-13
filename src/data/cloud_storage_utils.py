@@ -2,32 +2,72 @@ from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 import os
 import json
+import tempfile
+import pyspark as spark
+from pyspark.sql import SparkSession
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env file
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-
+GOOGLE_PROJECT_ID = os.getenv("GOOGLE_PROJECT_ID")
+GOOGLE_AUTH_URI = os.getenv("GOOGLE_AUTH_URI")
+GOOGLE_TOKEN_URI = os.getenv("GOOGLE_TOKEN_URI")
+GOOGLE_CERT_URL = os.getenv("GOOGLE_CERT_URL")
+GOOGLE_REDIRECT_URIS = os.getenv("GOOGLE_REDIRECT_URIS")
 
 def authenticate_drive():
     """Authenticate with Google Drive using environment variables."""
     gauth = GoogleAuth()
+    
+    
+    # DEBUG: Print environment variables
+    print("GOOGLE_CLIENT_ID:", os.getenv("GOOGLE_CLIENT_ID"))
+    print("GOOGLE_CLIENT_SECRET:", os.getenv("GOOGLE_CLIENT_SECRET"))
+    print("GOOGLE_AUTH_URI:", os.getenv("GOOGLE_AUTH_URI"))
+    print("GOOGLE_TOKEN_URI:", os.getenv("GOOGLE_TOKEN_URI"))
+    print("GOOGLE_CERT_URL:", os.getenv("GOOGLE_CERT_URL"))
+    print("GOOGLE_REDIRECT_URIS:", os.getenv("GOOGLE_REDIRECT_URIS"))
 
-    # Create settings dynamically
-    gauth_settings = {
-        "client_config_backend": "settings",
-        "client_config": {
-            "client_id": GOOGLE_CLIENT_ID,
-            "client_secret": GOOGLE_CLIENT_SECRET,
-            "redirect_uris": ["http://localhost"]
-        },
-        "oauth_scope": ["https://www.googleapis.com/auth/drive"],
+    # Check if any of them are None (unset)
+    if None in [
+        os.getenv("GOOGLE_CLIENT_ID"),
+        os.getenv("GOOGLE_CLIENT_SECRET"),
+        os.getenv("GOOGLE_AUTH_URI"),
+        os.getenv("GOOGLE_TOKEN_URI"),
+        os.getenv("GOOGLE_CERT_URL"),
+        os.getenv("GOOGLE_REDIRECT_URIS"),
+    ]:
+        print("⚠️ Missing required environment variables!")
+        return None
+
+    # Ensure GOOGLE_REDIRECT_URIS is properly formatted
+    try:
+        redirect_uris = json.loads(os.getenv("GOOGLE_REDIRECT_URIS", '["http://localhost"]'))
+    except json.JSONDecodeError:
+        print("⚠️ Invalid format for GOOGLE_REDIRECT_URIS. It should be a valid JSON string.")
+        return None
+
+ # Create temporary JSON file
+    client_config = {
+        "installed": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "auth_uri": os.getenv("GOOGLE_AUTH_URI"),
+            "token_uri": os.getenv("GOOGLE_TOKEN_URI"),
+            "auth_provider_x509_cert_url": os.getenv("GOOGLE_CERT_URL"),
+            "redirect_uris": json.loads(os.getenv("GOOGLE_REDIRECT_URIS", '["http://localhost"]'))
+        }
     }
 
-    # Save settings to a temporary file
-    temp_settings_path = "/tmp/pydrive_settings.json"
-    with open(temp_settings_path, "w") as f:
-        json.dump(gauth_settings, f)
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as temp_json:
+        json.dump(client_config, temp_json)
+        temp_json_path = temp_json.name
 
-    gauth.LoadClientConfigFile(temp_settings_path)
+    # Load the temporary JSON file
+    gauth.LoadClientConfigFile(temp_json_path)
 
     try:
         gauth.LocalWebserverAuth()  # Authenticate user via browser
@@ -116,4 +156,32 @@ def get_file_id_by_title(file_title, folder_id=None):
     if file_list:
         return file_list[0]['id']
     else:
+        return None
+    
+    
+def load_csv_from_drive(file_id):
+    """
+    Downloads a CSV file from Google Drive using its file ID to a temporary location,
+    reads it into a pandas DataFrame, and returns the DataFrame.
+
+    Args:
+        file_id (str): The Google Drive file ID of the CSV.
+
+    Returns:
+        pd.DataFrame: The DataFrame loaded from the CSV file.
+    """
+    
+        # Create a SparkSession if not already created.
+    spark_sess = SparkSession.builder.getOrCreate()
+    # Authenticate and download the file to a temporary location.
+    local_temp_file = tempfile.NamedTemporaryFile(suffix=".csv", delete=False).name
+    if download_file_from_drive(file_id, local_temp_file):
+        try:
+            df =  spark.read.csv(local_temp_file, header=True, inferSchema=True)
+            return df
+        except Exception as e:
+            print(f"Error reading CSV file: {e}")
+            return None
+    else:
+        print("Download failed.")
         return None
