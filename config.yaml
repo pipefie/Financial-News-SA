@@ -18,10 +18,9 @@ local_paths:
   raw_data: "data/raw"
   processed_data: "data/processed"
 
-# Google Drive folder IDs 
+# s3 utils
 
-drive_folders:
-  raw_news_folder_id: "YOUR_FOLDER_ID"
-  processed_data_folder_id: "YOUR_FOLDER_ID"
-  historical_price_data_folder_id: "YOUR_FOLDER_ID"
+s3_bucket: "financialdata-sa"
+s3_folders_paths:
+  raw_news: "RawNews/"
 
