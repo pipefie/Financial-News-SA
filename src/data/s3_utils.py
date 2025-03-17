@@ -2,6 +2,7 @@ import os
 import boto3
 import botocore
 from dotenv import load_dotenv
+import subprocess
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
