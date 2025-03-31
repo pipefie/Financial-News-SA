@@ -59,7 +59,7 @@ class PreprocessingPipeline:
             .setInputCols(["token"])
             .setOutputCol("normalized")
             .setLowercase(True)
-            .setCleanupPatterns(["""[^\p{L}\p{N}]+"""])  # keep letters & digits
+            .setCleanupPatterns(["""[^\\p{L}\\p{N}]+"""])  # keep letters & digits
         )
 
         # StopWords Cleaner
