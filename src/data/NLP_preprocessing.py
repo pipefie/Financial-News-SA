@@ -84,7 +84,7 @@ class PreprocessingPipeline:
             Finisher()
             .setInputCols(["lemma"])
             .setOutputCols(["finished_tokens"])
-            .setIncludeKeys(False)
+            #.setIncludeKeys(False) gives error
         )
 
         # Build the pipeline
