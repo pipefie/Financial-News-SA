@@ -11,3 +11,12 @@ https://huggingface.co/distilbert/distilroberta-base
 https://huggingface.co/FacebookAI/roberta-base 
 
 https://www.kaggle.com/datasets/miguelaenlle/massive-stock-news-analysis-db-for-nlpbacktests?select=raw_partner_headlines.csv (2010 - 2020)
+
+https://www.kaggle.com/datasets/ankurzing/sentiment-analysis-for-financial-news
+
+https://huggingface.co/ProsusAI/finbert
+
+https://www.kaggle.com/datasets/aravsood7/sentiment-analysis-labelled-financial-news-data
+
+https://www.kaggle.com/datasets/ankurzing/sentiment-analysis-for-financial-news
+
