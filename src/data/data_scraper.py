@@ -11,7 +11,7 @@ import os
 
 
 # Set the relative path (adjust as needed)
-output_path = "../data/raw/stock_symbols.csv"
+output_path = "../../data/raw/stock_symbols.csv"
 
 # Create the directory if it doesn't exist
 os.makedirs(os.path.dirname(output_path), exist_ok=True)

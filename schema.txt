@@ -4,11 +4,12 @@ financial_sentiment_project/
 │   └── processed/          # Cleaned/processed data
 ├── notebooks/              # Jupyter notebooks for EDA and experiments
 ├── src/
-│   ├── data/               # Scripts for data ingestion and cleaning, including cloud connection
-│   │   └── cloud_storage_utils.py  # Utility functions for connecting to Google Drive/OneDrive
+│   ├── data/               # Scripts for data ingestion and cleaning, including S3 connection
 │   ├── models/             # Model training and evaluation scripts
 │   ├── pipeline/           # Combined pipelines (sentiment analysis, price prediction)
 │   └── utils/              # Additional helper functions
 ├── requirements.txt        # List of dependencies (pyspark, pydrive, etc.)
+├── resources.txt           # URLs to the different resoruces for the project 
+├── schema.txt              # general schema for the project            
 ├── config.yaml             # Configuration file for data paths, API keys, parameters, etc.
 └── README.md               # Project overview and instructions
