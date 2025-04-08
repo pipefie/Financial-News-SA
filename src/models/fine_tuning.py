@@ -1,7 +1,9 @@
-from transformers import DistilBertTokenizerFast, DistilBertForSequenceClassification, Trainer, TrainingArguments
-from datasets import Dataset, load_metric
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, AutoConfig
+from datasets import Dataset
+import evaluate
 import pandas as pd
 from src.data.load_financial_phrasebank import load_financial_phrasebank, map_labels
+from src.models.custom_model import *
 
 def prepare_dataset(file_path, delimiter="@"):
     """
@@ -17,9 +19,19 @@ def prepare_dataset(file_path, delimiter="@"):
     # Load data into a pandas DataFrame
     df = load_financial_phrasebank(file_path, delimiter)
     df = map_labels(df)
+
+     # Rename 'label_id' to 'labels' so that Trainer sees the correct field.
+    if "label_id" in df.columns:
+        df = df.rename(columns={"label_id": "labels"})
+    # drop the original "label" column.
+    if "label" in df.columns:
+        df = df.drop(columns=["label"])
     
     # Convert the pandas DataFrame to a Hugging Face Dataset.
     dataset = Dataset.from_pandas(df)
+
+    # Shuffle the dataset for randomness and reproducibility
+    dataset = dataset.shuffle(seed=42)
 
     # First, split into 80% training and 20% temporary set
     split1 = dataset.train_test_split(test_size=0.2, seed=42)
@@ -31,13 +43,14 @@ def prepare_dataset(file_path, delimiter="@"):
     validation_dataset = split2["train"]
     test_dataset = split2["test"]
 
+
     return {
         "train": train_dataset,
         "validation": validation_dataset,
         "test": test_dataset
     }
 
-def fine_tune_model(train_dataset, eval_dataset, model_name="distilroberta-base"):
+def fine_tune_model(train_dataset, eval_dataset, model_name="distilbert/distilroberta-base"):
     """
     Fine-tune DistilRoBERTa for sentiment analysis using the provided training and evaluation datasets.
 
@@ -56,8 +69,14 @@ def fine_tune_model(train_dataset, eval_dataset, model_name="distilroberta-base"
     Returns:
         Trainer: The Trainer instance after training.
     """
-    tokenizer = DistilBertTokenizerFast.from_pretrained(model_name)
-    model = DistilBertForSequenceClassification.from_pretrained(model_name, num_labels=3)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    config = AutoConfig.from_pretrained(model_name)
+    config.num_labels = 3  # for negative, neutral, positive
+    config._name_or_path = model_name  # make sure our custom model knows which checkpoint to use
+
+    # Instantiate the custom model.
+    model = CustomSentimentModel.from_pretrained(model_name, config=config)
     
     # Tokenize the dataset
     def tokenize_function(example):
@@ -85,7 +104,7 @@ def fine_tune_model(train_dataset, eval_dataset, model_name="distilroberta-base"
         logging_steps=50,
     )
     
-    metric = load_metric("accuracy")
+    metric = evaluate.load("accuracy")
     def compute_metrics(eval_pred):
         logits, labels = eval_pred
         predictions = logits.argmax(axis=-1)
@@ -108,6 +127,7 @@ def fine_tune_model(train_dataset, eval_dataset, model_name="distilroberta-base"
 
 # Example usage (for testing, run via a notebook or script):
 if __name__ == "__main__":
+
     file_path = "../../data/processed/phraseBank/FinancialPhraseBank-v1.0/Sentences_AllAgree.txt"  
     # Prepare the dataset (with shuffling and 80/10/10 split)
     splits = prepare_dataset(file_path)

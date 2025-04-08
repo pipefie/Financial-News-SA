@@ -1,4 +1,5 @@
 import pandas as pd
+import chardet
 
 def load_financial_phrasebank(file_path, delimiter="@"):
     """
@@ -12,8 +13,13 @@ def load_financial_phrasebank(file_path, delimiter="@"):
     Returns:
         pd.DataFrame: A DataFrame with columns "text" and "label".
     """
+    with open(file_path, "rb") as f:
+        raw_data = f.read(100000)  # read a sample
+        result = chardet.detect(raw_data)
+        print("Detected encoding:", result["encoding"])
+
     data = []
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, "r", encoding=result["encoding"]) as f:
         for line in f:
             # Remove trailing newline and split on the delimiter
             parts = line.strip().split(delimiter)
