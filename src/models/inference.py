@@ -67,7 +67,7 @@ def predict_sentiment_udf(texts: pd.Series) -> pd.Series:
     """
     # Use an environment variable to specify the model directory;
     # default to "./finetuned_distilroberta" if not provided.
-    model_dir = os.getenv("FINETUNED_MODEL_DIR", "./finetuned_distilroberta")
+    model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "finetuned_distilroberta"))
     
     # Cache the pipeline so that each executor only loads it once per partition.
     global _MODEL_CACHE
