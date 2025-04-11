@@ -85,6 +85,10 @@ def fine_tune_model(train_dataset, eval_dataset, model_name="distilbert/distilro
     tokenized_train = train_dataset.map(tokenize_function, batched=True)
     tokenized_eval = eval_dataset.map(tokenize_function, batched=True)
     
+    tokenized_train.set_format("torch", columns=["input_ids", "attention_mask", "labels"])
+    tokenized_eval.set_format("torch", columns=["input_ids", "attention_mask", "labels"])
+    
+    
     #  Define the training arguments.
     #    TrainingArguments is a configuration class that specifies details like:
     #      - output_dir: where model checkpoints and logs are saved.
@@ -104,11 +108,16 @@ def fine_tune_model(train_dataset, eval_dataset, model_name="distilbert/distilro
         logging_steps=50,
     )
     
-    metric = evaluate.load("accuracy")
+    accuracy_metric = evaluate.load("accuracy")
+    f1_metric = evaluate.load("f1")
+
     def compute_metrics(eval_pred):
         logits, labels = eval_pred
         predictions = logits.argmax(axis=-1)
-        return metric.compute(predictions=predictions, references=labels)
+        accuracy = accuracy_metric.compute(predictions=predictions, references=labels)["accuracy"]
+    # For F1, you can choose "macro" averaging (suitable for multiclass classification)
+        f1 = f1_metric.compute(predictions=predictions, references=labels, average="macro")["f1"]
+        return {"accuracy": accuracy, "f1": f1}
     
     # Initialize the Trainer.
     #    Trainer is a high-level API that handles the training loop, evaluation, saving, etc.
